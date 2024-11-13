@@ -135,8 +135,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// Get the port from the environment variable, default to 80 if not set
+	port := os.Getenv("HTTP_PORT")
+	if port == "" {
+		port = "80"
+	}
+
 	// Start the server
 	http.HandleFunc("/", handler)
-	log.Println("Starting server on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Printf("Starting server on :%s", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
