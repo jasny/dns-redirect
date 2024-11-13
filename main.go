@@ -1,43 +1,21 @@
 package main
 
 import (
-	"fmt"
+	"crypto/tls"
+	"golang.org/x/crypto/acme/autocert"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"strings"
-
-	"github.com/miekg/dns"
 )
 
 var (
-	clientConfig    *dns.ClientConfig
-	dnsClient       *dns.Client
 	redirectDomains map[string]int
+	useCache        bool
 )
 
 func init() {
-	// Initialize DNS client configuration
-	configFile := os.Getenv("DNS_CONFIG_FILE")
-	if configFile == "" {
-		configFile = "/etc/resolv.conf"
-	}
-
-	var err error
-	clientConfig, err = dns.ClientConfigFromFile(configFile)
-	if err != nil {
-		// If there's an error reading the config file, fall back to Google Public DNS
-		log.Printf("Error reading DNS config, defaulting to Google Public DNS: %v", err)
-		clientConfig = &dns.ClientConfig{
-			Servers: []string{"8.8.8.8"},
-			Port:    "53",
-		}
-	}
-
-	// Set up a new DNS client
-	dnsClient = new(dns.Client)
-
 	// Initialize the redirect domains map from environment variables
 	redirectDomains = make(map[string]int)
 	domainEnvToStatus := map[string]int{
@@ -59,27 +37,9 @@ func init() {
 	if len(redirectDomains) == 0 {
 		log.Fatal("No redirect domains defined. Please set at least one REDIRECT_DOMAIN_ environment variable.")
 	}
-}
 
-func getCNAME(host string) (string, error) {
-	// Set up a new DNS message
-	msg := new(dns.Msg)
-	msg.SetQuestion(dns.Fqdn(host), dns.TypeCNAME)
-
-	// Execute the query to a public DNS server
-	response, _, err := dnsClient.Exchange(msg, clientConfig.Servers[0]+":"+clientConfig.Port)
-	if err != nil {
-		return "", err
-	}
-
-	// Loop through the answers and retrieve the CNAME
-	for _, ans := range response.Answer {
-		if cnameRecord, ok := ans.(*dns.CNAME); ok {
-			return cnameRecord.Target, nil
-		}
-	}
-
-	return "", fmt.Errorf("no CNAME record found for host: %s", host)
+	// Initialize the DNS client
+	initDNS()
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -134,15 +94,54 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, target, statusCode)
 }
 
-func main() {
-	// Get the port from the environment variable, default to 80 if not set
-	port := os.Getenv("HTTP_PORT")
-	if port == "" {
-		port = "80"
+func startHttpServer(certManager *autocert.Manager) {
+	httpPort := os.Getenv("HTTP_PORT")
+	if httpPort == "" {
+		httpPort = "80"
 	}
 
-	// Start the server
-	http.HandleFunc("/", handler)
-	log.Printf("Starting server on :%s", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	// Use the certManager's HTTPHandler to handle ACME challenges for Let's Encrypt
+	log.Printf("Starting HTTP server on :%s", httpPort)
+	log.Fatal(http.ListenAndServe(":"+httpPort, certManager.HTTPHandler(http.HandlerFunc(handler))))
+}
+
+func startHttpsServer(certManager *autocert.Manager) {
+	httpPort := os.Getenv("HTTP_PORT")
+	httpsPort := os.Getenv("HTTPS_PORT")
+
+	if httpsPort == "" {
+		if httpPort != "" && httpPort != "80" {
+			return
+		}
+		httpsPort = "443"
+	}
+
+	if httpPort != "" && httpPort != "80" {
+		log.Fatal("Unable to serve HTTPS traffic if HTTP is not served on port 80 due to Let's Encrypt challenge")
+	}
+
+	// HTTPS server with Let's Encrypt
+	server := &http.Server{
+		Addr:    ":" + httpsPort,
+		Handler: http.HandlerFunc(handler),
+		TLSConfig: &tls.Config{
+			GetCertificate: certManager.GetCertificate,
+		},
+	}
+
+	// Start the HTTPS server
+	log.Printf("Starting HTTPS server on :%s", httpsPort)
+	log.Fatal(server.ListenAndServeTLS("", ""))
+}
+
+func main() {
+	// Create an autocert manager for Let's Encrypt certificates
+	certManager := autocert.Manager{
+		Prompt: autocert.AcceptTOS,
+		Cache:  autocert.DirCache("certs"), // Folder for storing certificates
+	}
+
+	go startHttpServer(&certManager)
+	go startHttpsServer(&certManager)
+	select {}
 }

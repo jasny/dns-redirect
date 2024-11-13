@@ -13,9 +13,11 @@ This Go service is designed to dynamically handle HTTP requests based on CNAME D
 - Network connectivity to perform DNS lookups.
 
 ## Environment Variables
+
+### Redirect Domains
+
 The service uses environment variables to determine which domains to redirect and with which HTTP status codes. The following environment variables are supported:
 
-- `DNS_CONFIG_FILE`: Path to the DNS configuration file (default: `/etc/resolv.conf`).
 - `REDIRECT_DOMAIN_301`: Domain suffix to be redirected with HTTP status code 301 (Moved Permanently).
 - `REDIRECT_DOMAIN_302`: Domain suffix to be redirected with HTTP status code 302 (Found).
 - `REDIRECT_DOMAIN_303`: Domain suffix to be redirected with HTTP status code 303 (See Other).
@@ -24,12 +26,20 @@ The service uses environment variables to determine which domains to redirect an
 
 > **Note**: At least one of the `REDIRECT_DOMAIN_` environment variables must be defined, or the service will exit with an error.
 
+### Other Environment Variables
+
+- `DNS_CONFIG_FILE`: Path to the DNS configuration file (default: `/etc/resolv.conf`).
+- `CACHE_DNS`: Whether to cache DNS lookups (default: `false`). 
+- `HTTP_PORT`: Port on which the service listens for incoming HTTP requests (default: `80`).
+- `HTTPS_PORT`: Port on which the service listens for incoming HTTPS requests (default: `443`).
+
 ## How It Works
-1. The service listens on port `8080` and handles incoming HTTP requests.
+1. The service listens on port `80` and handles incoming HTTP requests and port `443` for HTTPS requests.
 2. For each request, it performs a CNAME lookup for the hostname.
 3. Based on the CNAME result, it determines if the CNAME ends with one of the configured suffixes (e.g., `example.com`).
 4. If a match is found, the service removes the suffix and redirects the request to the target domain with the appropriate status code.
-5. The scheme (`http` or `https`) is preserved from the original request.
+5. For HTTPS requests an SSL certificate is requested from Let's Encrypt (on the first request of that domain).
+6. The scheme (`http` or `https`) is preserved from the original request.
 
 ## Running the Service
 To run the service:
@@ -42,8 +52,8 @@ To run the service:
    ```
 3. Build and run the service:
    ```sh
-   go build -o dynamic-cname-redirect
-   ./dynamic-cname-redirect
+   go build -o dns-redirect
+   ./dns-redirect
    ```
 
 ## Example Usage
