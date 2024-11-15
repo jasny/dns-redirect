@@ -60,6 +60,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// Fetch the CNAME record for the host
 	cname, err := getCNAME(host)
 	if err != nil {
+		cname, err = getCNAME("@." + host)
+	}
+
+	if err != nil {
 		// If there is an error, log it and return an error to the user
 		log.Printf("Error fetching CNAME for %s: %v", host, err)
 		http.Error(w, "Unable to fetch CNAME", http.StatusInternalServerError)
