@@ -1,0 +1,51 @@
+name: Rebuild and Deploy if Base Image Updates
+
+env:
+  BASE_IMAGE: alpine
+  IMAGE_NAME: dns-redirect
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Pull latest base image
+        run: docker pull ${{ env.BASE_IMAGE }}
+
+      - name: Check if base image is updated
+        id: image_updated
+        run: |
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ env.BASE_IMAGE }})
+          if [ "$DIGEST" != "$(cat digest.txt 2>/dev/null)" ]; then
+            echo "$DIGEST" > digest.txt
+            echo "updated=$1" >> $GITHUB_OUTPUT
+          else
+            echo "echo 'updated=false"
+          fi
+
+      - name: Checkout repository
+        if: steps.image_updated.outputs.updated == 'true'
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        if: steps.image_updated.outputs.updated == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        if: steps.image_updated.outputs.updated == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ vars.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest' >> $GITHUB_OUTPUT
+
