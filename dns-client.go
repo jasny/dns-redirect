@@ -97,3 +97,24 @@ func getCNAME(host string) (string, error) {
 
 	return "", fmt.Errorf("no CNAME record found for host: %s", host)
 }
+
+func getIpAddress(host string) (string, error) {
+	// Set up a new DNS message
+	msg := new(dns.Msg)
+	msg.SetQuestion(dns.Fqdn(host), dns.TypeA)
+
+	// Execute the query to a public DNS server
+	response, _, err := dnsClient.Exchange(msg, clientConfig.Servers[0]+":"+clientConfig.Port)
+	if err != nil {
+		return "", err
+	}
+
+	// Loop through the answers and retrieve the IP address
+	for _, ans := range response.Answer {
+		if aRecord, ok := ans.(*dns.A); ok {
+			return aRecord.A.String(), nil
+		}
+	}
+
+	return "", fmt.Errorf("no A record found for host: %s", host)
+}

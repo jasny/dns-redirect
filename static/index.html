@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>DNS Redirect</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+          }
+          h1 {
+            color: #2c3e50;
+          }
+          code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 4px;
+          }
+          pre.code {
+            background-color: #f4f4f4;
+            padding: 10px;
+          }
+          .status-code {
+            font-weight: bold;
+            color: #e74c3c;
+          }
+        </style>
+    </head>
+    <body>
+        <h1>DNS Redirect</h1>
+        <p>This guide explains how to configure your domain to redirect to the desired target using the DNS redirect service.</p>
+
+        <h2>How It Works</h2>
+        <p>
+            The redirect service allows you to configure a domain to automatically redirect to a new destination based
+            on <code>CNAME</code> records. By adding a <code>CNAME</code> record to your DNS, you can specify the target
+            domain for redirection and indicate the type of HTTP status code to be used.
+        </p>
+
+        <h3>Configure your domain</h3>
+        <p>
+            Add a <code>CNAME</code> record pointing from your desired domain to the target domain you want to
+            redirect to, followed by one of the redirect domains:
+        </p>
+        <ul>
+            {{if .RedirectDomain301}}
+            <li><code>{{.RedirectDomain301}}</code> - Redirects with status code <span class="status-code">301 (Moved Permanently)</span>.</li>
+            {{end}}
+            {{if .RedirectDomain302}}
+            <li><code>{{.RedirectDomain302}}</code> - Redirects with status code <span class="status-code">302 (Found)</span>.</li>
+            {{end}}
+            {{if .RedirectDomain303}}
+            <li><code>{{.RedirectDomain303}}</code> - Redirects with status code <span class="status-code">303 (See Other)</span>.</li>
+            {{end}}
+            {{if .RedirectDomain307}}
+            <li><code>{{.RedirectDomain307}}</code> - Redirects with status code <span class="status-code">307 (Temporary Redirect)</span>.</li>
+            {{end}}
+            {{if .RedirectDomain308}}
+            <li><code>{{.RedirectDomain308}}</code> - Redirects with status code <span class="status-code">308 (Permanent Redirect)</span>.</li>
+            {{end}}
+        </ul>
+        <p>The redirect domain is cached for the duration of the <code>TTL</code> value of the <code>CNAME</code> record.</p>
+
+        <h3>Example</h3>
+        <p>
+            Suppose you want to redirect your <strong>.net</strong> domain (<code>www.example.net</code>) to your
+            <strong>.com</strong> domain (<code>www.example.com</code>). You should create <code>CNAME</code> record for
+            <code>www.example.net</code> that points to <code>www.example.com.{{.RedirectDomain}}</code>.
+        </p>
+
+        <h2>Apex DNS record</h2>
+        <p>
+            The domain apex, is the DNS record without a subdomain (eg <code>example.com</code>). This can't be a
+            <code>CNAME</code> record, because it must be an <code>A</code> record. To configure a redirect for your
+            apex domain:
+        </p>
+        <ul>
+            <li>Create an <code>A</code> record pointing to IP address <code>{{.IpAddress}}</code> for the apex domain.</li>
+            <li>Create a CNAME record for sudomain <code>@</code> as shown above.</li>
+        </ul>
+
+        <h3>Example</h3>
+        <p>
+            Suppose you want to redirect <code>example.net</code> to <code>example.com</code>. You should create an
+            <code>A</code> record for <code>example.net</code> to <code>{{.IpAddress}}</code> and a <code>CNAME</code>
+            record for <code>@.example.net</code> that points to <code>example.com.{{.RedirectDomain}}</code>.
+        </p>
+
+        <h2>Visiting your domain</h2>
+        <p>
+            When someone visits your domain, they will automatically be redirected to the specified target domain
+            according to the <code>CNAME</code> record and the corresponding HTTP status code.
+        </p>
+
+        <p>
+            The URL path and query are unchanged for the redirect. Example; <code>https://example.com/hello?planet=world</code>
+            will redirect to <code>https://example.net/hello?planet=world</code>.
+        </p>
+
+        <h3>Automatic HTTPS support</h3>
+        <p>
+            The redirect service will not modify the schema (http or https) of the request. For HTTPS, a certificate is
+            automatically obtained using <a href="https://letsencrypt.org/" target="_blank">Let's Encrypt</a> on the
+            first request.
+        </p>
+
+        <h2>Host your own service</h2>
+        <p>
+            This service is also available as <strong>Docker image</strong>. It's a lightweight application written in
+            Go that can handle many requests using minimal resources.
+        </p>
+
+        <pre class="code">docker run -d \
+  -e REDIRECT_DOMAIN_301=redirect.example.com \
+  -p 80:80 -p 443:443 \
+  -v certs:/var/app/certs \
+  jasny/dns-redirect</pre>
+
+        <p>
+            Please visit <a href="https://hub.docker.com/r/jasny/dns-redirect">the project on Docker Hub</a> for more information.
+        </p>
+
+        <h3>Source code</h3>
+        <p>
+            The source code is available under the MIT license at <a href="https://github.com/jasny/dns-redirect">jasny/dns-redirect on GitHub</a>.
+        </p>
+
+        <h2>Author</h2>
+        <p>This is a free service by <a href="https://www.jasny.net">Jasny</a>.</p>
+    </body>
+</html>

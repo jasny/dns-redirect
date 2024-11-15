@@ -2,12 +2,13 @@ package main
 
 import (
 	"crypto/tls"
-	"golang.org/x/crypto/acme/autocert"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"strings"
+
+	"golang.org/x/crypto/acme/autocert"
 )
 
 var (
@@ -16,7 +17,12 @@ var (
 )
 
 func init() {
-	// Initialize the redirect domains map from environment variables
+	initRedirectDomains()
+	initDNS()
+	initStatic()
+}
+
+func initRedirectDomains() {
 	redirectDomains = make(map[string]int)
 	domainEnvToStatus := map[string]int{
 		"REDIRECT_DOMAIN_301": http.StatusMovedPermanently,
@@ -37,17 +43,18 @@ func init() {
 	if len(redirectDomains) == 0 {
 		log.Fatal("No redirect domains defined. Please set at least one REDIRECT_DOMAIN_ environment variable.")
 	}
-
-	// Initialize the DNS client
-	initDNS()
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	// Split the host and port, if present
 	host, _, err := net.SplitHostPort(r.Host)
 	if err != nil {
-		// If no port is specified, assume host is already just the hostname
 		host = r.Host
+	}
+
+	// When visiting a redirect domain directly, serve the static page
+	if _, exists := redirectDomains[host]; exists {
+		serveStaticPage(w, r)
+		return
 	}
 
 	// Fetch the CNAME record for the host
