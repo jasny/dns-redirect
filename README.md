@@ -32,6 +32,7 @@ The service uses environment variables to determine which domains to redirect an
 - `CACHE_DNS`: Whether to cache DNS lookups (default: `false`). 
 - `HTTP_PORT`: Port on which the service listens for incoming HTTP requests (default: `80`).
 - `HTTPS_PORT`: Port on which the service listens for incoming HTTPS requests (default: `443`).
+- `FORCE_DNS`: If set, the static landing page is only served over HTTPS. Requests over HTTP will be redirected to HTTPS.
 
 ## How It Works
 1. The service listens on port `80` and handles incoming HTTP requests and port `443` for HTTPS requests.
@@ -39,7 +40,7 @@ The service uses environment variables to determine which domains to redirect an
 3. Based on the CNAME result, it determines if the CNAME ends with one of the configured suffixes (e.g., `example.com`).
 4. If a match is found, the service removes the suffix and redirects the request to the target domain with the appropriate status code.
 5. For HTTPS requests an SSL certificate is requested from Let's Encrypt (on the first request of that domain).
-6. The scheme (`http` or `https`) is preserved from the original request.
+6. The scheme (`http` or `https`) is preserved from the original request, except when `FORCE_DNS` is set, in which case the static page is always served over HTTPS.
 
 ## Running the Service
 To run the service:

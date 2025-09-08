@@ -53,6 +53,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// When visiting a redirect domain directly, serve the static page
 	if _, exists := redirectDomains[host]; exists {
+		// Force HTTPS for the static page when FORCE_DNS is set
+		if os.Getenv("FORCE_DNS") != "" && r.TLS == nil {
+			target := "https://" + host + r.URL.String()
+			log.Printf("Redirect (301) http://%s%s to %s", host, r.URL.String(), target)
+			http.Redirect(w, r, target, http.StatusMovedPermanently)
+			return
+		}
+
 		serveStaticPage(w, r)
 		return
 	}
