@@ -1,0 +1,157 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.7;
+  color: #2c3e50;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%);
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  background: white;
+  padding: 60px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 10px 20px rgba(0, 0, 0, 0.06);
+}
+
+h1 {
+  color: #1a1a1a;
+  font-size: 2.5em;
+  font-weight: 700;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+
+h2 {
+  color: #2c3e50;
+  font-size: 1.8em;
+  font-weight: 600;
+  margin-top: 48px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e1e8ed;
+}
+
+h3 {
+  color: #34495e;
+  font-size: 1.3em;
+  font-weight: 600;
+  margin-top: 32px;
+  margin-bottom: 12px;
+}
+
+p {
+  margin-bottom: 16px;
+  font-size: 1.05em;
+  color: #4a5568;
+}
+
+code {
+  background-color: #f7fafc;
+  color: #c7254e;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9em;
+  border: 1px solid #e2e8f0;
+}
+
+pre.code {
+  background-color: #2d3748;
+  color: #e2e8f0;
+  padding: 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 20px 0;
+  line-height: 1.6;
+  border: 1px solid #4a5568;
+}
+
+pre.code code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  border: none;
+  font-size: 0.95em;
+}
+
+.status-code {
+  font-weight: 600;
+  color: #e53e3e;
+  background-color: #fff5f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+ul {
+  margin: 20px 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+ul li {
+  padding: 12px 0 12px 32px;
+  position: relative;
+  line-height: 1.6;
+}
+
+ul li::before {
+  content: '→';
+  position: absolute;
+  left: 8px;
+  color: #3182ce;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+a {
+  color: #3182ce;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+a:hover {
+  border-bottom-color: #3182ce;
+}
+
+strong {
+  color: #2d3748;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 20px 10px;
+  }
+
+  main {
+    padding: 30px 20px;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    margin-top: 36px;
+  }
+
+  h3 {
+    font-size: 1.2em;
+  }
+
+  pre.code {
+    padding: 15px;
+    font-size: 0.85em;
+  }
+}
