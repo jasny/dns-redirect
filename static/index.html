@@ -3,36 +3,37 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>DNS Redirect</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-          }
-          h1 {
-            color: #2c3e50;
-          }
-          code {
-            background-color: #f4f4f4;
-            padding: 2px 4px;
-            border-radius: 4px;
-          }
-          pre.code {
-            background-color: #f4f4f4;
-            padding: 10px;
-          }
-          .status-code {
-            font-weight: bold;
-            color: #e74c3c;
-          }
-        </style>
+        <title>DNS Redirect - Simple Domain Redirection Service</title>
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <h1>DNS Redirect</h1>
-        <p>This guide explains how to configure your domain to redirect to the desired target using the DNS redirect service.</p>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>DNS Redirect</h1>
+                <p>Simple, powerful domain redirection using DNS records. Configure redirects in minutes with automatic HTTPS support.</p>
+            </div>
+        </section>
+
+        <div class="container">
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast</h3>
+                    <p>Minimal overhead with efficient DNS-based routing. Built with Go for maximum performance.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Automatic HTTPS</h3>
+                    <p>Free SSL certificates automatically obtained via Let's Encrypt on first request.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Easy Setup</h3>
+                    <p>Just add a CNAME record to your DNS. No complicated configuration required.</p>
+                </div>
+            </div>
+
+            <div class="card">
 
         <h2>How It Works</h2>
         <p>
@@ -46,31 +47,39 @@
             Add a <code>CNAME</code> record pointing from your desired domain to the target domain you want to
             redirect to, followed by one of the redirect domains:
         </p>
-        <ul>
-            {{if .RedirectDomain301}}
-            <li><code>{{.RedirectDomain301}}</code> - Redirects with status code <span class="status-code">301 (Moved Permanently)</span>.</li>
-            {{end}}
-            {{if .RedirectDomain302}}
-            <li><code>{{.RedirectDomain302}}</code> - Redirects with status code <span class="status-code">302 (Found)</span>.</li>
-            {{end}}
-            {{if .RedirectDomain303}}
-            <li><code>{{.RedirectDomain303}}</code> - Redirects with status code <span class="status-code">303 (See Other)</span>.</li>
-            {{end}}
-            {{if .RedirectDomain307}}
-            <li><code>{{.RedirectDomain307}}</code> - Redirects with status code <span class="status-code">307 (Temporary Redirect)</span>.</li>
-            {{end}}
-            {{if .RedirectDomain308}}
-            <li><code>{{.RedirectDomain308}}</code> - Redirects with status code <span class="status-code">308 (Permanent Redirect)</span>.</li>
-            {{end}}
-        </ul>
+
+        <div class="highlight-box">
+            <ul>
+                {{if .RedirectDomain301}}
+                <li><code>{{.RedirectDomain301}}</code> - Redirects with status code <span class="status-code">301 (Moved Permanently)</span>.</li>
+                {{end}}
+                {{if .RedirectDomain302}}
+                <li><code>{{.RedirectDomain302}}</code> - Redirects with status code <span class="status-code">302 (Found)</span>.</li>
+                {{end}}
+                {{if .RedirectDomain303}}
+                <li><code>{{.RedirectDomain303}}</code> - Redirects with status code <span class="status-code">303 (See Other)</span>.</li>
+                {{end}}
+                {{if .RedirectDomain307}}
+                <li><code>{{.RedirectDomain307}}</code> - Redirects with status code <span class="status-code">307 (Temporary Redirect)</span>.</li>
+                {{end}}
+                {{if .RedirectDomain308}}
+                <li><code>{{.RedirectDomain308}}</code> - Redirects with status code <span class="status-code">308 (Permanent Redirect)</span>.</li>
+                {{end}}
+            </ul>
+        </div>
+
         <p>The redirect domain is cached for the duration of the <code>TTL</code> value of the <code>CNAME</code> record.</p>
 
         <h3>Example</h3>
-        <p>
-            Suppose you want to redirect your <strong>.net</strong> domain (<code>www.example.net</code>) to your
-            <strong>.com</strong> domain (<code>www.example.com</code>). You should create <code>CNAME</code> record for
-            <code>www.example.net</code> that points to <code>www.example.com.{{.RedirectDomain}}</code>.
-        </p>
+        <div class="example-box">
+            <p>
+                Suppose you want to redirect your <strong>.net</strong> domain (<code>www.example.net</code>) to your
+                <strong>.com</strong> domain (<code>www.example.com</code>). You should create <code>CNAME</code> record for
+                <code>www.example.net</code> that points to <code>www.example.com.{{.RedirectDomain}}</code>.
+            </p>
+        </div>
+
+        <hr class="section-divider">
 
         <h2>Apex DNS record</h2>
         <p>
@@ -84,11 +93,15 @@
         </ul>
 
         <h3>Example</h3>
-        <p>
-            Suppose you want to redirect <code>example.net</code> to <code>example.com</code>. You should create an
-            <code>A</code> record for <code>example.net</code> to <code>{{.IpAddress}}</code> and a <code>CNAME</code>
-            record for <code>@.example.net</code> that points to <code>example.com.{{.RedirectDomain}}</code>.
-        </p>
+        <div class="example-box">
+            <p>
+                Suppose you want to redirect <code>example.net</code> to <code>example.com</code>. You should create an
+                <code>A</code> record for <code>example.net</code> to <code>{{.IpAddress}}</code> and a <code>CNAME</code>
+                record for <code>@.example.net</code> that points to <code>example.com.{{.RedirectDomain}}</code>.
+            </p>
+        </div>
+
+        <hr class="section-divider">
 
         <h2>Visiting your domain</h2>
         <p>
@@ -108,6 +121,9 @@
             first request.
         </p>
 
+        </div>
+
+        <div class="card">
         <h2>Host your own service</h2>
         <p>
             This service is also available as <strong>Docker image</strong>. It's a lightweight application written in
@@ -129,7 +145,17 @@
             The source code is available under the MIT license at <a href="https://github.com/jasny/dns-redirect">jasny/dns-redirect on GitHub</a>.
         </p>
 
-        <h2>Author</h2>
-        <p>This is a free service by <a href="https://www.jasny.net">Jasny</a>.</p>
+        </div>
+
+        <div class="cta-section">
+            <h2>Free and Open Source</h2>
+            <p>This is a free service by <a href="https://www.jasny.net">Jasny</a>. Licensed under MIT and available on GitHub.</p>
+        </div>
+
+        </div>
+
+        <footer>
+            <p>&copy; 2025 DNS Redirect Service. Built with Go. Powered by <a href="https://www.jasny.net">Jasny</a>.</p>
+        </footer>
     </body>
 </html>
