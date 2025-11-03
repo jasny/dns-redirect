@@ -8,29 +8,16 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   line-height: 1.6;
   color: #2c3e50;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #b1bfff 0%, #67a572 100%);
   min-height: 100vh;
 }
 
 .hero {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 80px 20px;
   text-align: center;
   position: relative;
   overflow: hidden;
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=1920') center/cover;
-  opacity: 0.15;
-  z-index: 0;
 }
 
 .hero-content {
@@ -222,7 +209,7 @@ a:hover {
 }
 
 .cta-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3a4576 0%, #353885 100%);
   color: white;
   padding: 60px 40px;
   border-radius: 12px;
@@ -242,7 +229,7 @@ a:hover {
 }
 
 footer {
-  background: #2d3748;
+  background: #000000;
   color: white;
   text-align: center;
   padding: 30px 20px;
